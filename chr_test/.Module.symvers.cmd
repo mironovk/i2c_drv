@@ -1,0 +1,1 @@
+cmd_/media/psf/Home/GIT/i2c_drv/chr_test/Module.symvers := sed 's/ko$$/o/' /media/psf/Home/GIT/i2c_drv/chr_test/modules.order | scripts/mod/modpost -m -a  -o /media/psf/Home/GIT/i2c_drv/chr_test/Module.symvers -e -i Module.symvers   -T -

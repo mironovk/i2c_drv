@@ -1,0 +1,1 @@
+cmd_/media/psf/Home/GIT/i2c_drv/chr_test/chr_drv_test.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /media/psf/Home/GIT/i2c_drv/chr_test/chr_drv_test.ko /media/psf/Home/GIT/i2c_drv/chr_test/chr_drv_test.o /media/psf/Home/GIT/i2c_drv/chr_test/chr_drv_test.mod.o;  true

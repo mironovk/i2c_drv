@@ -1,0 +1,1 @@
+cmd_/media/psf/Home/GIT/i2c_drv/chr_test/chr_drv_test.mod := printf '%s\n'   chr_drv_test.o | awk '!x[$$0]++ { print("/media/psf/Home/GIT/i2c_drv/chr_test/"$$0) }' > /media/psf/Home/GIT/i2c_drv/chr_test/chr_drv_test.mod
