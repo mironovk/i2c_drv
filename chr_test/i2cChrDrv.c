@@ -1,14 +1,14 @@
-#include "chr_drv_test.h"
-#include "chr_drv_ioctl.h"
+#include "ChrPart.h"
+// #include "i2cPart.h"
+#include "userIOCTL.h"
 
 MODULE_LICENSE("Dual MIT/GPL");
 
 
-int __init chr_drv_test_init(void)
+int __init i2cChrDrv_init(void)
 {
-	//printk("chr_drv_test_init called.");
-	DBGMSG("i2c_drv_init called.\n");
-	deviceMajorNum = register_chrdev(0, DEVICE_NAME, &chr_drv_test_functions);
+	DBGMSG("I2cChrDrv_init called.\n");
+	deviceMajorNum = register_chrdev(0, DEVICE_NAME, &i2cChrDrv_functions);
 	if(deviceMajorNum < 0)
 	{
 		DBGMSG("Register device failed\n");
@@ -37,51 +37,57 @@ int __init chr_drv_test_init(void)
 		return -1;
 	}
 
-	DBGMSG("i2c_drv_init completed!\n");
+	DBGMSG("i2cChrDrv_init completed!\n");
+	// return i2c_add_driver(&bmp180_driver);
 	return 0;
 }
 
-void __exit chr_drv_test_exit(void)
+void __exit i2cChrDrv_exit(void)
 {
-	DBGMSG("i2c_drv_exit called.\n");
+	DBGMSG("i2cChrDrv_exit called.\n");
 	
 	device_destroy(deviceClass, MKDEV(deviceMajorNum, 0));
 	class_unregister(deviceClass);
 	class_destroy(deviceClass);
 	unregister_chrdev(deviceMajorNum, DEVICE_NAME);
+	
+	// i2c_del_driver(&bmp180_driver);
+	// return 0;
 }
+module_init(i2cChrDrv_init);
+module_exit(i2cChrDrv_exit);
 
 
-static int i2c_drv_open(struct inode* Inode, struct file* File)
+static int i2cChrDrv_open(struct inode* Inode, struct file* File)
 {
 	if(deviceOpenCount == 0)
 	{
-		DBGMSG("i2c_drv_open called.\n");
+		DBGMSG("i2cChrDrv_open called.\n");
 		deviceOpenCount++;
 		return 0;
 	}
 	else
 	{
-		DBGMSG("device already opened!\n");
-		return -1;
+		DBGMSG("Device already opened!\n");
+		return -13;
 	}
 }
 
-static int i2c_drv_release(struct inode* Inode, struct file* File)
+static int i2cChrDrv_release(struct inode* Inode, struct file* File)
 {
-	DBGMSG("i2c_drv_release called.\n");
+	DBGMSG("i2cChrDrv_release called.\n");
 	deviceOpenCount--;
 	return 0;
 }
 
-static long int i2c_drv_ioctl(struct file* File, unsigned int Cmd, unsigned long Arg)
+static long int i2cChrDrv_ioctl(struct file* File, unsigned int Cmd, unsigned long Arg)
 {
-	DBGMSG("i2c_drv_ioctl called.\n");
-	char* data = (char*)Arg;
-	// drv_ioctl_data* buffer = (drv_ioctl_data*)Arg;
+	DBGMSG("i2cChrDrv_ioctl called.\n");
+	// char* data = (char*)Arg;
+	drv_ioctl_data* data = (drv_ioctl_data*)Arg;
 	// DBGMSG("struct.\n");
 	// char* data = (char*)Arg;
-	// get_user(tmp_buff, d_data->InputData)
+	// get_user(temperature_buffer, data->InputData)
 	// if(copy_from_user(data->InputData, tmp_buff, 5))
 	// {
 	// 	DBGMSG("Class create failed\n");
@@ -89,8 +95,8 @@ static long int i2c_drv_ioctl(struct file* File, unsigned int Cmd, unsigned long
 	// }
 		
 	
-	// DBGMSG("data->InputData: %s\n", tmp_buff);
-	DBGMSG("drv_ioctl_data...\n");
+	// DBGMSG("data->InputData: %s\n", temperature_buffer);
+	// DBGMSG("drv_ioctl_data...\n");
 
 	switch(Cmd)
 	{
@@ -105,8 +111,8 @@ static long int i2c_drv_ioctl(struct file* File, unsigned int Cmd, unsigned long
 			{
 				int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
 				DBGMSG("length = %d\n", length);
-				// int res = copy_to_user(data->OutputData, temperature_buffer, deviceDataLength);
-				int res = copy_to_user(data, temperature_buffer, length);
+				int res = copy_to_user(data->OutputData, temperature_buffer, length);
+				// int res = copy_to_user(data, temperature_buffer, length);
 				DBGMSG("copy_to_user res = %d\n", res);
 			}
 			
@@ -122,7 +128,8 @@ static long int i2c_drv_ioctl(struct file* File, unsigned int Cmd, unsigned long
 			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
 			// copy_to_user (data, pressure_buffer, length);
 			int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
-			int res = copy_to_user(data, pressure_buffer, length);
+			int res = copy_to_user(data->OutputData, pressure_buffer, length);		
+			// int res = copy_to_user(data, pressure_buffer, length);
 			DBGMSG("copy_to_user res = %d\n", res);
 			break;
 		}
@@ -136,9 +143,10 @@ static long int i2c_drv_ioctl(struct file* File, unsigned int Cmd, unsigned long
 			DBGMSG("altitude_buffer: %s\n", altitude_buffer);
 			// deviceDataLength = strlen(altitude_buffer);
 			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
-			// copy_to_user (data->OutputData, altitude_buffer, length);
+			
 			int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
-			int res = copy_to_user(data, altitude_buffer, length);
+			int res = copy_to_user (data->OutputData, altitude_buffer, length);
+			// int res = copy_to_user(data, altitude_buffer, length);
 			DBGMSG("copy_to_user res = %d\n", res);
 			break;
 		}
@@ -152,9 +160,10 @@ static long int i2c_drv_ioctl(struct file* File, unsigned int Cmd, unsigned long
 			DBGMSG("EEPROM_buffer: %s\n", EEPROM_buffer);
 			// deviceDataLength = strlen(EEPROM_buffer);
 			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
-			// copy_to_user (data->OutputData, EEPROM_buffer, length);
+			
 			int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
-			int res = copy_to_user(data, EEPROM_buffer, length);
+			int res = copy_to_user (data->OutputData, EEPROM_buffer, length);
+			// int res = copy_to_user(data, EEPROM_buffer, length);
 			DBGMSG("copy_to_user res = %d\n", res);
 			break;
 		}
@@ -162,9 +171,6 @@ static long int i2c_drv_ioctl(struct file* File, unsigned int Cmd, unsigned long
 
 	return 0;
 }
-
-module_init(chr_drv_test_init);
-module_exit(chr_drv_test_exit);
 
 void Calculation ()
 {

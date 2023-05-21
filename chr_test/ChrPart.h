@@ -5,11 +5,10 @@
 #include <linux/slab.h>
 #include <linux/fs.h>
 #include <linux/uaccess.h>
-// #include <asm/uaccess.h>
 
 
 
-#define DEVICE_NAME "BMP180_drv"
+#define DEVICE_NAME "BMP180"
 #define DEVICE_CLASS "MyI2CSensors"
 #define DBGMSG(fmt, ...) printk(DEVICE_NAME": "fmt, ##__VA_ARGS__)
 
@@ -33,20 +32,20 @@ static struct device *deviceHandle = 0;
 static int deviceOpenCount = 0;
 
 
-int __init chr_drv_test_init(void);
-void __exit chr_drv_test_exit(void);
+int __init i2cChrDrv_init(void);
+void __exit i2cChrDrv_exit(void);
 
 
-static int i2c_drv_open(struct inode* Inode, struct file* File);
-static int i2c_drv_release(struct inode* Inode, struct file* File);
-static long int i2c_drv_ioctl(struct file* File, unsigned int Cmd, unsigned long Arg);
+static int i2cChrDrv_open(struct inode* Inode, struct file* File);
+static int i2cChrDrv_release(struct inode* Inode, struct file* File);
+static long int i2cChrDrv_ioctl(struct file* File, unsigned int Cmd, unsigned long Arg);
 
 void Calculation(void);
 
 
-static struct file_operations chr_drv_test_functions = {
+static struct file_operations i2cChrDrv_functions = {
 	.owner = THIS_MODULE,
-	.open = i2c_drv_open,
-	.release = i2c_drv_release,
-	.unlocked_ioctl = i2c_drv_ioctl
+	.open = i2cChrDrv_open,
+	.release = i2cChrDrv_release,
+	.unlocked_ioctl = i2cChrDrv_ioctl
 };

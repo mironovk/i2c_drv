@@ -1,4 +1,4 @@
-TARGET := i2cChrDrv
+TARGET := i2c_drv
 PWD := $(shell pwd)
 KERNEL := $(shell uname -r)
 
@@ -11,5 +11,5 @@ all:
 clean:
 	make -C /lib/modules/$(KERNEL)/build M=$(PWD) clean
 
-dt: device_tree.dts
-	dtc -@ -I dts -O dtb -o device_tree.dtbo device_tree.dts
+dt: testoverlay.dts
+	dtc -@ -I dts -O dtb -o testoverlay.dtbo testoverlay.dts
