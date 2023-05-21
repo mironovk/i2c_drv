@@ -9,7 +9,7 @@
 #include "chr_drv_ioctl.h"
 
 // #define _GNU_SOURCE
-drv_ioctl_data data = { 0 };
+
 
 
 
@@ -23,16 +23,17 @@ int main()
 	}
 	else
 	{
-		
-		data.InputData = "Some data.";
-		data.InputLength = strlen(data.InputData) + 1;
-		data.OutputData = (char*)malloc(BUFFER_SIZE);
-		data.OutputLength = BUFFER_SIZE;
-		memset(data.OutputData, 0, BUFFER_SIZE); 
-		memcpy(data.OutputData, "U R in IOCTL_GET_PRESSURE", data.OutputLength);
-		// char* buffer[BUFFER_SIZE+1] = {0};
-		printf("data.InputData: %s\n", data.InputData);
-		printf("data.OutputData: %s\n", data.OutputData);
+		// drv_ioctl_data data = { 0 };
+		// data.InputData = "Some data.";
+		// data.InputLength = strlen(data.InputData) + 1;
+		// data.OutputData = (char*)malloc(BUFFER_SIZE);
+		// data.OutputLength = BUFFER_SIZE;
+		// memset(data.OutputData, 0, BUFFER_SIZE); 
+		// memcpy(data.OutputData, "U R in IOCTL_GET_PRESSURE", data.OutputLength);
+		char* data[BUFFER_SIZE] = { 0 };
+		// char* data = (char*)malloc(BUFFER_SIZE);
+		// printf("data.InputData: %s\n", data.InputData);
+		// printf("data.OutputData: %s\n", data.OutputData);
 		// getchar();
 		// unsigned long d = &data;
 		// // unsigned long d = (unsigned long)(&data);
@@ -44,42 +45,52 @@ int main()
 		/////////////////////////////// IOCTL_GET_TEMPERATURE ///////////////////////////////
 	
 		printf("IOCTL_GET_TEMPERATURE:\n");
-		memset(data.OutputData, 0, BUFFER_SIZE);
+		// memset(data.OutputData, 0, BUFFER_SIZE);
+		memset(data, 0, BUFFER_SIZE);
 		// getchar();
+		// res = ioctl(device, IOCTL_GET_TEMPERATURE, &buffer);
 		res = ioctl(device, IOCTL_GET_TEMPERATURE, &data);
-		printf("Temperature:\t%s\n", data.OutputData);
+		printf("ioctl res:\t%d\n", res);
+		printf("Temperature:\t%s\n", data);
+		// printf("Temperature:\t%s\n", data.OutputData);
 		//printf("Error code name: %s\n", strerrorname_np(errno));
 		// getchar();
 
 		/////////////////////////////// IOCTL_GET_PRESSURE    ///////////////////////////////
 
 		printf("IOCTL_GET_PRESSURE:\n");
-		memset(data.OutputData, 0, BUFFER_SIZE);
+		// memset(data.OutputData, 0, BUFFER_SIZE);
+		memset(data, 0, BUFFER_SIZE);
 		res = ioctl(device, IOCTL_GET_PRESSURE, &data);
-		printf("Pressure:\t%s\n", data.OutputData);
+		printf("Pressure:\t%s\n", data);
+		// printf("Pressure:\t%s\n", data.OutputData);
 		// getchar();
 
 		/////////////////////////////// IOCTL_GET_ALTITUDE    ///////////////////////////////
 
 		printf("IOCTL_GET_ALTITUDE:\n");
-		memset(data.OutputData, 0, BUFFER_SIZE);
+		// memset(data.OutputData, 0, BUFFER_SIZE);
+		memset(data, 0, BUFFER_SIZE);
 		res = ioctl(device, IOCTL_GET_ALTITUDE, &data);
-		printf("Altitude:\t%s\n", data.OutputData);
+		printf("Altitude:\t%s\n", data);
+		// printf("Altitude:\t%s\n", data.OutputData);
 		// getchar();
 
 		/////////////////////////////// IOCTL_GET_EEPROOM     ///////////////////////////////
 
 		printf("IOCTL_GET_EEPROOM:\n");
-		memset(data.OutputData, 0, BUFFER_SIZE);
+		// memset(data.OutputData, 0, BUFFER_SIZE);
+		memset(data, 0, BUFFER_SIZE);
 		res = ioctl(device, IOCTL_GET_EEPROOM, &data);
-		printf("EEPROM:\t%s\n", data.OutputData);
-
-		free(data.OutputData);
-		// getchar();
-		close(device);
+		printf("EEPROM:\t%s\n", data);
+		// printf("EEPROM:\t%s\n", data.OutputData);
+		free(data);
+		// free(data.OutputData);
+		
 	}
 
-	
+	getchar();
+	close(device);
 	
 	return 0;
 }
