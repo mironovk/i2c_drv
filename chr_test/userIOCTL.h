@@ -1,7 +1,7 @@
 #include <linux/ioctl.h>
 //#include <sys/ioctl.h>
 
-#define DRV_MAGIC 0xB2
+#define DRV_MAGIC 0xCF
 
 #define TEMPERATURE_GET 0x70 
 #define PRESSURE_GET 0x71 

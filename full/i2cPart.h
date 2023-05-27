@@ -1,4 +1,5 @@
 #include <linux/i2c.h>
+#include <linux/delay.h>
 
 /* DEVICE_TREE:    arch/arm/boot/dts/stm32mp15xx-dkx.dtsi */ 
 #define DEVICE_NAME "BMP180"
@@ -8,7 +9,7 @@
 #define BMP180_ADDRESS 0x77
 // #define BMP180_READ_ADDRESS	0xEF		/* BMP180 I2C address for read */
 // #define BMP180_WRITE_ADDRESS	0xEE		/* BMP180 I2C address for write */
-#define DELAY 4500  /* Calculation delay, us */
+// unsigned long DELAY = 4500;  /* Calculation delay, us */
 short oss = 0; /* Pressure Accuracy */
 
 /* EEPROM data */
@@ -58,7 +59,7 @@ static int bmp180_remove (struct i2c_client *client);
 /* drivers/gpio/gpio-pa9570.c */
 static struct i2c_device_id bmp180_id_table[];
 
-static struct of_device_id bmp180_of_match_table[];
+// static struct of_device_id bmp180_of_match_table[];
 
 /* drivers/gpio/gpio-pa9570.c */
 static struct i2c_driver bmp180_driver;
@@ -68,3 +69,6 @@ void Calculation(void);
 // static int __init bmp180_init(void);
 
 // static void __exit bmp180_exit(void);
+
+static struct i2c_adapter* bmp180_adapter;
+// struct i2c_board_info bmp180_board_info;

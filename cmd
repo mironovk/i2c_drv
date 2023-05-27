@@ -14,4 +14,24 @@ ls -l /sys/bus/i2c/devices/
 
 sudo dtoverlay device_tree.dtbo
 
+ dtoverlay=MyI2CSensors,bmp180,0x77
+
+ http://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-firmware/
+
+ &i2c1 {
+    i2c-scl-rising-time-ns = <185>;
+    i2c-scl-falling-time-ns = <20>;
+    clock-frequency = <400000>;
+    status = "okay";
+
+    bmp180@77 {
+        compatible = "MyI2CSensors, bmp180";
+        reg = <0x77>;
+        status = "okay"
+    };
+
+}
+
+
+
 

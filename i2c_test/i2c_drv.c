@@ -46,7 +46,7 @@ static struct i2c_driver bmp180_driver = {
 	.id_table = bmp180_id_table,
 	
 };
-// module_i2c_driver(bmp180_driver);
+module_i2c_driver(bmp180_driver);
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -124,16 +124,19 @@ void Calculation()
 	// i2c_smbus_write_byte_data(bmp180_client, 0xf4, ((5<<5) | (5<<2) | (3<<0)));	
 }
 
-static int __init bmp180_init(void)
-{
-      DBGMSG("bmp180_init called!\n");
-	return i2c_add_driver(&bmp180_driver);
-}
-static void __exit bmp180_exit(void)
-{
-      DBGMSG("bmp180_exit called!\n");
-	i2c_del_driver(&bmp180_driver);
-}
-module_init(bmp180_init);
-module_exit(bmp180_exit);
+// static int __init bmp180_init(void)
+// {
+//       DBGMSG("bmp180_init called!\n");
+//       i2c_add_driver(&bmp180_driver);
+//       DBGMSG("bmp180_driver addr: 0x%p\n", &bmp180_driver);
+//       DBGMSG("client addr: 0x%p\n", bmp180_client);
+// 	return 0;
+// }
+// static void __exit bmp180_exit(void)
+// {
+//       DBGMSG("bmp180_exit called!\n");
+// 	i2c_del_driver(&bmp180_driver);
+// }
+// module_init(bmp180_init);
+// module_exit(bmp180_exit);
 

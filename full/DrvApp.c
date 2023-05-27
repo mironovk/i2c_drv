@@ -1,13 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
+// #include <fcntl.h>
 #include <errno.h> 
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
+#include <sys/fcntl.h> 
+// #include <sys/stat.h>
+#include <sys/ioctl.h>      
+// #include <unistd.h>     
+// #include <stdio.h>
+// #include <stdlib.h>
 #include "userIOCTL.h"
 
+drv_ioctl_data data;
 
 int main()
 {
@@ -19,11 +26,28 @@ int main()
 	}
 	else
 	{
-		drv_ioctl_data data = { 0 };
+		int res = 0;
+
+		getchar();
+		
 		data.InputData = "Some data.";
 		data.InputLength = strlen(data.InputData) + 1;
-		data.OutputData = (char*)malloc(BUFFER_SIZE);
+		data.OutputData = malloc(BUFFER_SIZE);
 		data.OutputLength = BUFFER_SIZE;
+		memcpy(data.OutputData, "U R in IOCTL_GET_PRESSURE", data.OutputLength);
+
+		printf("data address: 0x%p\n", &data);
+		printf("data.InputData address: 0x%p\ndata.InputData value: 0x%s\n", &data.InputData, data.InputData);
+		printf("data.InputLength address: 0x%p\ndata.InputLength value: 0x%lu\n", &data.InputLength, data.InputLength);
+
+		printf("data.OutputData address: 0x%p\ndata.OutputData value: 0x%s\n", &data.OutputData, data.OutputData);
+		printf("data.OutputLength address: 0x%p\ndata.OutputLength value: 0x%lu\n", &data.OutputLength, data.OutputLength);
+		
+		getchar();
+
+		// printf("data.InputLength address: 0x%p\n", &data);
+		// printf("data.OutputData address: 0x%p\n", &data);
+		// printf("data.OutputLength address: 0x%p\n", &data);
 		// memset(data.OutputData, 0, BUFFER_SIZE); 
 		// memcpy(data.OutputData, "U R in IOCTL_GET_PRESSURE", data.OutputLength);
 		// char* data[BUFFER_SIZE] = { 0 };
@@ -37,7 +61,7 @@ int main()
 		// printf("InputData:\t%s\n", p_data->InputData);
 
 		// getchar();
-		int res = 0;
+		
 		/////////////////////////////// IOCTL_GET_TEMPERATURE ///////////////////////////////
 	
 		printf("IOCTL_GET_TEMPERATURE:\n");

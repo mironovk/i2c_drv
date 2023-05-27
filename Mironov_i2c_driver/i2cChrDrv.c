@@ -5,7 +5,7 @@
 MODULE_LICENSE("Dual MIT/GPL");
 
 /* Initialize I2C Board Info strucutre */
-static struct i2c_board_info bmp180_board_info = { I2C_BOARD_INFO("bmp180", 0x77) };
+struct i2c_board_info bmp180_board_info = { I2C_BOARD_INFO("bmp180", 0x77) };	// i2c address 0x77
 
 
 int __init i2cChrDrv_init(void)
@@ -46,12 +46,9 @@ int __init i2cChrDrv_init(void)
 	/* Initialize i2c_client structure */
 	bmp180_client = i2c_new_client_device(bmp180_adapter, &bmp180_board_info);
 
+	/* Register i2c driver */
 	i2c_add_driver(&bmp180_driver);
-	// if (platform_driver_register(&bmp180_driver))
-	// {
-	// 	DBGMSG("Error! Could not load driver!\n")
-	// 	return -1;
-	// }
+
 	DBGMSG("i2cChrDrv_init completed!\n");
 	return 0;
 	// return 0;
@@ -66,9 +63,8 @@ void __exit i2cChrDrv_exit(void)
 	class_destroy(deviceClass);
 	unregister_chrdev(deviceMajorNum, DEVICE_NAME);
 	
-	// platform_driver_unregister(&bmp180_driver)
 	i2c_del_driver(&bmp180_driver);
-	// return 0;
+	i2c_unregister_device(bmp180_client);
 }
 module_init(i2cChrDrv_init);
 module_exit(i2cChrDrv_exit);
@@ -79,7 +75,6 @@ static int i2cChrDrv_open(struct inode* Inode, struct file* File)
 	if(deviceOpenCount == 0)
 	{
 		DBGMSG("i2cChrDrv_open called.\n");
-		// bmp180_client = i2c_new_client_device(&adapter, &info);
 		deviceOpenCount++;
 		return 0;
 	}
@@ -105,63 +100,38 @@ static long int i2cChrDrv_ioctl(struct file* File, unsigned int Cmd, unsigned lo
 
 	res = 0;
 	length = 0;
-	// data = NULL;
 
 	DBGMSG("i2cChrDrv_ioctl called.\n");
-	// char* data = (char*)Arg;
+
 	data = (drv_ioctl_data*)Arg;
 	DBGMSG("data address: 0x%p\n", data);
-	// char* data = (char*)Arg;
-	// get_user(temperature_buffer, data->InputData)
-	// if(copy_from_user(data->InputData, tmp_buff, 5))
-	// {
-	// 	DBGMSG("Class create failed\n");
-	// 	return -EFAULT;
-	// }
-		
-	
-	// DBGMSG("data->InputData: %s\n", temperature_buffer);
-	// DBGMSG("drv_ioctl_data...\n");
 
 	switch(Cmd)
 	{
 		/////////////////////////////// IOCTL_GET_TEMPERATURE ///////////////////////////////
 		case IOCTL_GET_TEMPERATURE: {
-			DBGMSG("IOCTL_GET_TEMPERATURE\n");
-			// DBGMSG("data->InputData: %s\n", data->InputData);
-			// DBGMSG("IOCTL_GET_TEMPERATURE\n", );
-			// Calculation();
-			DBGMSG("bmp180_client address: 0x%p\n", bmp180_client);
-			DBGMSG("bmp180_driver address: 0x%p\n", &bmp180_driver);
-			DBGMSG("client address: 0x%X\n", bmp180_client->addr);
+			DBGMSG("/////////////////////////////// IOCTL_GET_TEMPERATURE ///////////////////////////////\n");
+			
+			Calculation();
 
-
-			// MSB = i2c_smbus_read_byte_data(bmp180_client, 0xF6);
-			DBGMSG("MSB = %d\n", MSB);
-			DBGMSG("temperature_buffer: %s\n", temperature_buffer);
 			deviceDataLength = strlen(temperature_buffer);
-			{
-				length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
-				DBGMSG("length = %d\n", length);
-				res = copy_to_user(data->OutputData, temperature_buffer, length);
-				// int res = copy_to_user(data, temperature_buffer, length);
-				DBGMSG("copy_to_user res = %d\n", res);
-			}
+			length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
+			
+			res = copy_to_user(data->OutputData, temperature_buffer, length);
+			DBGMSG("copy_to_user res = %d\n", res);
 			
 			break;
 		}
 		/////////////////////////////// IOCTL_GET_PRESSURE    ///////////////////////////////
 		case IOCTL_GET_PRESSURE: {
-			DBGMSG("IOCTL_GET_PRESSURE\n");
+			DBGMSG("/////////////////////////////// IOCTL_GET_PRESSURE    ///////////////////////////////\n");
 
 			Calculation();
-			DBGMSG("pressure_buffer: %s\n", pressure_buffer);
-			// deviceDataLength = strlen(pressure_buffer);   
-			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
-			// copy_to_user (data, pressure_buffer, length);
+
+			deviceDataLength = strlen(pressure_buffer);
 			length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
+
 			res = copy_to_user(data->OutputData, pressure_buffer, length);		
-			// int res = copy_to_user(data, pressure_buffer, length);
 			DBGMSG("copy_to_user res = %d\n", res);
 			break;
 		}
@@ -169,16 +139,14 @@ static long int i2cChrDrv_ioctl(struct file* File, unsigned int Cmd, unsigned lo
 
 		/////////////////////////////// IOCTL_GET_ALTITUDE    ///////////////////////////////
 		case IOCTL_GET_ALTITUDE: {
-			DBGMSG("IOCTL_GET_ALTITUDE\n");
+			DBGMSG("/////////////////////////////// IOCTL_GET_ALTITUDE    ///////////////////////////////\n");
 
 			Calculation();
-			DBGMSG("altitude_buffer: %s\n", altitude_buffer);
-			// deviceDataLength = strlen(altitude_buffer);
-			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
-			
-			length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
+
+			deviceDataLength = strlen(altitude_buffer);
+			length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
+
 			res = copy_to_user (data->OutputData, altitude_buffer, length);
-			// int res = copy_to_user(data, altitude_buffer, length);
 			DBGMSG("copy_to_user res = %d\n", res);
 			break;
 		}
@@ -186,16 +154,15 @@ static long int i2cChrDrv_ioctl(struct file* File, unsigned int Cmd, unsigned lo
 
 		/////////////////////////////// IOCTL_GET_EEPROOM     ///////////////////////////////
 		case IOCTL_GET_EEPROOM: {
-			DBGMSG("IOCTL_GET_EEPROOM\n");
+			DBGMSG("/////////////////////////////// IOCTL_GET_EEPROOM     ///////////////////////////////\n");
 
-			Calculation();
-			DBGMSG("EEPROM_buffer: %s\n", EEPROM_buffer);
-			// deviceDataLength = strlen(EEPROM_buffer);
-			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
-			
-			length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
+			/* Read Calibration Values */
+			ReadEEPROM();
+
+			deviceDataLength = strlen(EEPROM_buffer);
+			length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
+
 			res = copy_to_user (data->OutputData, EEPROM_buffer, length);
-			// int res = copy_to_user(data, EEPROM_buffer, length);
 			DBGMSG("copy_to_user res = %d\n", res);
 			break;
 		}
@@ -204,20 +171,6 @@ static long int i2cChrDrv_ioctl(struct file* File, unsigned int Cmd, unsigned lo
 	return 0;
 }
 
-// void Calculation ()
-// {
-// 	memset(temperature_buffer, 0, DEVICE_BUFFER_SIZE);
-// 	strcpy(temperature_buffer, "U R in IOCTL_GET_TEMPERATURE");
-
-// 	memset(pressure_buffer, 0, DEVICE_BUFFER_SIZE); 
-// 	strcpy(pressure_buffer, "U R in IOCTL_GET_PRESSURE");
-
-// 	memset(altitude_buffer, 0, DEVICE_BUFFER_SIZE);
-// 	strcpy(altitude_buffer, "U R in IOCTL_GET_ALTITUDE");
-
-// 	memset(EEPROM_buffer, 0, DEVICE_BUFFER_SIZE);
-// 	strcpy(EEPROM_buffer, "U R in IOCTL_GET_EEPROOM");
-// }
 
 static int bmp180_probe (struct i2c_client *client, const struct i2c_device_id *id) 
 {
@@ -241,29 +194,19 @@ static int bmp180_remove (struct i2c_client *client)
 
 static struct i2c_device_id bmp180_id_table[] = {
 	{ "bmp180", 0 },    
-	// { "bmp180_wr", 0 },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE (i2c, bmp180_id_table);
-
-// static struct of_device_id bmp180_of_match_table[] = {
-// 	//{ .compatible = "MyI2CSensors,bmp180" }, 
-//       { /* sentinel */ }
-// };
-// MODULE_DEVICE_TABLE (of, bmp180_of_match_table);
 
 static struct i2c_driver bmp180_driver = {
     .driver = {
 		.name = "bmp180",
 		.owner = THIS_MODULE,
-		// .of_match_table = bmp180_of_match_table,
 	},
 	.probe = bmp180_probe,
 	.remove = bmp180_remove,
 	.id_table = bmp180_id_table,
-      // .probe_new = bmp180_probe,
 };
-// module_i2c_driver(bmp180_driver);
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -271,51 +214,32 @@ static struct i2c_driver bmp180_driver = {
 void Calculation()
 {
     int res = 0;
-	DBGMSG("Calculation called!\n");
-	/* Read EEPROM data */
-	// int id = i2c_smbus_read_byte_data(bmp180_client, 0xD0);
-	// printk("ID: 0x%x\n", id);
+	DBGMSG("Calculation() called!\n");
 
 	/* Read Calibration Values */
-	AC1 = i2c_smbus_read_word_data(bmp180_client, 0xAA);
-	AC2 = i2c_smbus_read_word_data(bmp180_client, 0xAC);
-	AC3 = i2c_smbus_read_word_data(bmp180_client, 0xAE);
-	AC4 = i2c_smbus_read_word_data(bmp180_client, 0xB0);
-	AC5 = i2c_smbus_read_word_data(bmp180_client, 0xB2);
-	AC6 = i2c_smbus_read_word_data(bmp180_client, 0xB4);
-    B1 = i2c_smbus_read_word_data(bmp180_client, 0xB6);
-	B2 = i2c_smbus_read_word_data(bmp180_client, 0xB8);
-	MB = i2c_smbus_read_word_data(bmp180_client, 0xBA);
-	MC = i2c_smbus_read_word_data(bmp180_client, 0xBC);
-	MD = i2c_smbus_read_word_data(bmp180_client, 0xBE);
-
-	DBGMSG("EEPROM data read!\n");
-
-	memset(EEPROM_buffer, 0, DEVICE_BUFFER_SIZE);
-	DBGMSG("EEPROM_buffer address: 0x%p\nEEPROM_buffer value: %s\n", EEPROM_buffer, EEPROM_buffer);
-	sprintf(EEPROM_buffer, "%hd %hd %hd %hu %hu %hu %hd %hd %hd %hd %hd", AC1, AC2, AC3, AC4, AC5, AC6, B1, B2, MB, MC, MD);
-	// strcpy(EEPROM_buffer, "U R in IOCTL_GET_EEPROOM");
+	ReadEEPROM();
 	
     /* Read Uncompensated Temperature Value */
     res = i2c_smbus_write_byte_data(bmp180_client, 0xF4, 0x2E);
-    //sleep DELAY
+
+    /* Sleep 4.5 ms (sleep 5 ms used) */
 	mdelay(5);
-	UT = i2c_smbus_read_word_data(bmp180_client, 0xF6);
     MSB = i2c_smbus_read_byte_data(bmp180_client, 0xF6);
     LSB = i2c_smbus_read_byte_data(bmp180_client, 0xF7);
     UT = (MSB << 8) + LSB;
 
     /* Read Uncompensated Pressure Value */
     res = i2c_smbus_write_byte_data(bmp180_client, 0xF4, (0x34 + (oss << 6)));
-    //sleep DELAY 5ms
+    
+	/* Sleep 4.5 ms (sleep 5 ms used) */
 	mdelay(5);
-	// int UT = i2c_smbus_read_word_data(bmp180_client, 0xF6);
+	
     MSB = i2c_smbus_read_byte_data(bmp180_client, 0xF6);
     LSB = i2c_smbus_read_byte_data(bmp180_client, 0xF7);
     XLSB = i2c_smbus_read_byte_data(bmp180_client, 0xF8);
     UP = ((MSB << 16) + (LSB << 8) + XLSB) >> (8 - oss);
 
-    /* Calculate Temperature */
+    /* Calculate TRUE Temperature */
     X1 = ((UT - AC6) * AC5) >> 15;
     X2 = (MC << 11) / (X1 + MD);
     B5 = X1 + X2;
@@ -323,9 +247,9 @@ void Calculation()
 
 	memset(temperature_buffer, 0, DEVICE_BUFFER_SIZE);
 	sprintf(temperature_buffer, "%ld", T);
-	// strcpy(temperature_buffer, "U R in IOCTL_GET_TEMPERATURE");
+	DBGMSG("temperature_buffer:\t%s\n", temperature_buffer);
 
-    /* Calculate Pressure */
+    /* Calculate TRUE Pressure */
 	B6 = B5 - 4000;
     X1 = (B2 * ((B6 * B6) >> 12)) >> 11;
     X2 = (AC2 * B6) >> 11;
@@ -348,13 +272,71 @@ void Calculation()
     X1 = (X1 * 3038) >> 16;
     X2 = (-7357 * p) >> 16;
     p = p + ((X1 + X2 + 3791) >> 4);
-    // sprintf(pressure_buffer, "%ld", p);
 
 	memset(pressure_buffer, 0, DEVICE_BUFFER_SIZE); 
 	sprintf(pressure_buffer, "%ld", p);
-	// strcpy(pressure_buffer, "U R in IOCTL_GET_PRESSURE");
+	DBGMSG("pressure_buffer:\t%s\n", pressure_buffer);
 
-	// memset(altitude_buffer, 0, DEVICE_BUFFER_SIZE);
-	// strcpy(altitude_buffer, "U R in IOCTL_GET_ALTITUDE");
+	/* Calculate Altitude */
+
+
+	memset(altitude_buffer, 0, DEVICE_BUFFER_SIZE);
+	sprintf(altitude_buffer, "%ld", p);
+	DBGMSG("altitude_buffer:\t%s\n", altitude_buffer);
+}
+
+void ReadEEPROM()
+{
+	DBGMSG("ReadEEPROM() called!\n");
+
+	/* Read EEPROM data */
+	AC1_1 = i2c_smbus_read_byte_data(bmp180_client, 0xAA);
+	AC1_2 = i2c_smbus_read_byte_data(bmp180_client, 0xAB);
+	AC1 = ((AC1_1 << 8) + AC1_2);
+	
+	AC2_1 = i2c_smbus_read_byte_data(bmp180_client, 0xAC);
+	AC2_2 = i2c_smbus_read_byte_data(bmp180_client, 0xAD);
+	AC2 = ((AC2_1 << 8) + AC2_2);
+
+	AC3_1 = i2c_smbus_read_byte_data(bmp180_client, 0xAE);
+	AC3_2 = i2c_smbus_read_byte_data(bmp180_client, 0xAF);
+	AC3 = ((AC3_1 << 8) + AC3_2);
+
+	AC4_1 = i2c_smbus_read_byte_data(bmp180_client, 0xB0);
+	AC4_2 = i2c_smbus_read_byte_data(bmp180_client, 0xB1);
+	AC4 = ((AC4_1 << 8) + AC4_2);
+
+	AC5_1 = i2c_smbus_read_byte_data(bmp180_client, 0xB2);
+	AC5_2 = i2c_smbus_read_byte_data(bmp180_client, 0xB3);
+	AC5 = ((AC5_1 << 8) + AC5_2);
+
+	AC6_1 = i2c_smbus_read_byte_data(bmp180_client, 0xB4);
+	AC6_2 = i2c_smbus_read_byte_data(bmp180_client, 0xB5);
+	AC6 = ((AC6_1 << 8) + AC6_2);
+
+	B1_1 = i2c_smbus_read_byte_data(bmp180_client, 0xB6);
+	B1_2 = i2c_smbus_read_byte_data(bmp180_client, 0xB7);
+	B1 = ((B1_1 << 8) + B1_2);
+
+	B2_1 = i2c_smbus_read_byte_data(bmp180_client, 0xB8);
+	B2_2 = i2c_smbus_read_byte_data(bmp180_client, 0xB9);
+	B2 = ((B2_1 << 8) + B2_2);
+
+	MB_1 = i2c_smbus_read_byte_data(bmp180_client, 0xBA);
+	MB_2 = i2c_smbus_read_byte_data(bmp180_client, 0xBB);
+	MB = ((MB_1 << 8) + MB_2);
+
+	MC_1 = i2c_smbus_read_byte_data(bmp180_client, 0xBC);
+	MC_2 = i2c_smbus_read_byte_data(bmp180_client, 0xBD);
+	MC = ((MC_1 << 8) + MC_2);
+
+	MD_1 = i2c_smbus_read_byte_data(bmp180_client, 0xBE);
+	MD_2 = i2c_smbus_read_byte_data(bmp180_client, 0xBF);
+	MD = ((MD_1 << 8) + MD_2);
+
+	memset(EEPROM_buffer, 0, DEVICE_BUFFER_SIZE);
+	
+	sprintf(EEPROM_buffer, "%hd %hd %hd %hu %hu %hu %hd %hd %hd %hd %hd", AC1, AC2, AC3, AC4, AC5, AC6, B1, B2, MB, MC, MD);
+	DBGMSG("EEPROM_buffer:\t%s\n", EEPROM_buffer);
 }
 

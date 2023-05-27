@@ -83,9 +83,11 @@ static int i2cChrDrv_release(struct inode* Inode, struct file* File)
 static long int i2cChrDrv_ioctl(struct file* File, unsigned int Cmd, unsigned long Arg)
 {
 	DBGMSG("i2cChrDrv_ioctl called.\n");
-	// char* data = (char*)Arg;
-	drv_ioctl_data* data = (drv_ioctl_data*)Arg;
-	// DBGMSG("struct.\n");
+	char* data = (char*)Arg;
+	// volatile drv_ioctl_data* data = (drv_ioctl_data*)Arg;
+
+	DBGMSG("data = %p\n", data);
+	// DBGMSG("data = %p\n", data->OutputLength);
 	// char* data = (char*)Arg;
 	// get_user(temperature_buffer, data->InputData)
 	// if(copy_from_user(data->InputData, tmp_buff, 5))
@@ -111,62 +113,62 @@ static long int i2cChrDrv_ioctl(struct file* File, unsigned int Cmd, unsigned lo
 			{
 				int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
 				DBGMSG("length = %d\n", length);
-				int res = copy_to_user(data->OutputData, temperature_buffer, length);
-				// int res = copy_to_user(data, temperature_buffer, length);
+				// int res = copy_to_user(data->OutputData, temperature_buffer, length);
+				int res = copy_to_user(data, temperature_buffer, length);
 				DBGMSG("copy_to_user res = %d\n", res);
 			}
 			
 			break;
 		}
 		/////////////////////////////// IOCTL_GET_PRESSURE    ///////////////////////////////
-		case IOCTL_GET_PRESSURE: {
-			DBGMSG("IOCTL_GET_PRESSURE\n");
+		// case IOCTL_GET_PRESSURE: {
+		// 	DBGMSG("IOCTL_GET_PRESSURE\n");
 
-			Calculation();
-			DBGMSG("pressure_buffer: %s\n", pressure_buffer);
-			// deviceDataLength = strlen(pressure_buffer);   
-			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
-			// copy_to_user (data, pressure_buffer, length);
-			int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
-			int res = copy_to_user(data->OutputData, pressure_buffer, length);		
-			// int res = copy_to_user(data, pressure_buffer, length);
-			DBGMSG("copy_to_user res = %d\n", res);
-			break;
-		}
+		// 	Calculation();
+		// 	DBGMSG("pressure_buffer: %s\n", pressure_buffer);
+		// 	// deviceDataLength = strlen(pressure_buffer);   
+		// 	// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
+		// 	// copy_to_user (data, pressure_buffer, length);
+		// 	int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
+		// 	int res = copy_to_user(data->OutputData, pressure_buffer, length);		
+		// 	// int res = copy_to_user(data, pressure_buffer, length);
+		// 	DBGMSG("copy_to_user res = %d\n", res);
+		// 	break;
+		// }
 
 
-		/////////////////////////////// IOCTL_GET_ALTITUDE    ///////////////////////////////
-		case IOCTL_GET_ALTITUDE: {
-			DBGMSG("IOCTL_GET_ALTITUDE\n");
+		// /////////////////////////////// IOCTL_GET_ALTITUDE    ///////////////////////////////
+		// case IOCTL_GET_ALTITUDE: {
+		// 	DBGMSG("IOCTL_GET_ALTITUDE\n");
 
-			Calculation();
-			DBGMSG("altitude_buffer: %s\n", altitude_buffer);
-			// deviceDataLength = strlen(altitude_buffer);
-			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
+		// 	Calculation();
+		// 	DBGMSG("altitude_buffer: %s\n", altitude_buffer);
+		// 	// deviceDataLength = strlen(altitude_buffer);
+		// 	// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
 			
-			int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
-			int res = copy_to_user (data->OutputData, altitude_buffer, length);
-			// int res = copy_to_user(data, altitude_buffer, length);
-			DBGMSG("copy_to_user res = %d\n", res);
-			break;
-		}
+		// 	int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
+		// 	int res = copy_to_user (data->OutputData, altitude_buffer, length);
+		// 	// int res = copy_to_user(data, altitude_buffer, length);
+		// 	DBGMSG("copy_to_user res = %d\n", res);
+		// 	break;
+		// }
 	
 
-		/////////////////////////////// IOCTL_GET_EEPROOM     ///////////////////////////////
-		case IOCTL_GET_EEPROOM: {
-			DBGMSG("IOCTL_GET_EEPROOM\n");
+		// /////////////////////////////// IOCTL_GET_EEPROOM     ///////////////////////////////
+		// case IOCTL_GET_EEPROOM: {
+		// 	DBGMSG("IOCTL_GET_EEPROOM\n");
 
-			Calculation();
-			DBGMSG("EEPROM_buffer: %s\n", EEPROM_buffer);
-			// deviceDataLength = strlen(EEPROM_buffer);
-			// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
+		// 	Calculation();
+		// 	DBGMSG("EEPROM_buffer: %s\n", EEPROM_buffer);
+		// 	// deviceDataLength = strlen(EEPROM_buffer);
+		// 	// size_t length = deviceDataLength > data->OutputLength ? data->OutputLength : deviceDataLength;
 			
-			int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
-			int res = copy_to_user (data->OutputData, EEPROM_buffer, length);
-			// int res = copy_to_user(data, EEPROM_buffer, length);
-			DBGMSG("copy_to_user res = %d\n", res);
-			break;
-		}
+		// 	int length = deviceDataLength > BUFFER_SIZE ? BUFFER_SIZE : deviceDataLength;
+		// 	int res = copy_to_user (data->OutputData, EEPROM_buffer, length);
+		// 	// int res = copy_to_user(data, EEPROM_buffer, length);
+		// 	DBGMSG("copy_to_user res = %d\n", res);
+		// 	break;
+		// }
 	}
 
 	return 0;
